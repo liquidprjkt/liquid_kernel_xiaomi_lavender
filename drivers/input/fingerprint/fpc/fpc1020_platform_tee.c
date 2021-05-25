@@ -61,9 +61,7 @@
 
 #define NUM_PARAMS_REG_ENABLE_SET 2
 
-#ifdef CONFIG_MACH_LONGCHEER
 extern int fpsensor;
-#endif
 
 static const char * const pctl_names[] = {
 	"fpc1020_reset_reset",
@@ -123,7 +121,6 @@ static int vreg_setup(struct fpc1020_data *fpc1020, const char *name,
 	int rc;
 	struct regulator *vreg;
 	struct device *dev = fpc1020->dev;
-
 	for (i = 0; i < ARRAY_SIZE(fpc1020->vreg); i++) {
 		const char *n = vreg_conf[i].name;
 
