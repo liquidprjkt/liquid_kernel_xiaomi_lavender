@@ -7,7 +7,7 @@ git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86
 git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 los-4.9-32
 echo "Done"
 IMAGE=$(pwd)/out/arch/arm64/boot/Image.gz-dtb
-TANGGAL=$(date +"%F-%S")
+TANGGAL=$(date +"%Y%m%d")
 START=$(date +"%s")
 KERNEL_DIR=$(pwd)
 export PATH=$KERNEL_DIR/clang/bin:$PATH
@@ -15,7 +15,7 @@ export KBUILD_COMPILER_STRING="$(${KERNEL_DIR}/clang/bin/clang --version | head 
 export ARCH=arm64
 export KBUILD_BUILD_HOST=UsiF
 export KBUILD_BUILD_USER="liquid-CI"
-status="BETA"
+status="EAS-STABLE"
 
 # Send info plox channel
 function sendinfo() {
@@ -35,12 +35,14 @@ function push() {
 }
 # Fin Error
 function finerr() {
-    curl -s -X POST "https://api.telegram.org/bot${token}/sendMessage"
-        -d chat_id="${chat_id}" \
-        -d "disable_web_page_preview=true" \
-        -d "parse_mode=markdown" \
-        -d text="Build throw an error(s)"
+    log=$(echo *.log)
+        curl -F document=@$log "https://api.telegram.org/bot${token}/sendDocument" \
+        -F chat_id="${chat_id}" \
+        -F "disable_web_page_preview=true" \
+        -F "parse_mode=html" \
+        -F caption="Build failed..."
 }
+
 # Compile plox
 function compile() {
 
@@ -61,18 +63,21 @@ function compile() {
                       HOSTAR=llvm-ar \
                       CROSS_COMPILE=aarch64-linux-gnu- \
                       CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+					  V=0 2>&1 | tee build.log
 
-    if ! [ -a "$IMAGE" ]; then
+
+    if [ -d "$IMAGE" ]; then
         finerr
-    elsea
-        push
+    else
+        cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
+        zipping
+        kpush
     fi
-    cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 }
 # Zipping
 function zipping() {
     cd AnyKernel
-    zip -r9 liquid-1.0-lavender-${TANGGAL}.zip *
+    zip -r9 liquid-${VER}-lavender-${STATUS}-${TANGGAL}.zip *
     cd ..
 }
 
@@ -89,8 +94,5 @@ function kpush() {
 
 sendinfo
 compile
-zipping
-kpush
 END=$(date +"%s")
 DIFF=$(($END - $START))
-push
