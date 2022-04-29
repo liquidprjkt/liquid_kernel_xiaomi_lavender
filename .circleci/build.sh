@@ -3,7 +3,7 @@ echo "Cloning dependencies"
 git clone --depth=1 https://github.com/sohamxda7/llvm-stable  clang
 git clone https://github.com/sohamxda7/llvm-stable -b gcc64 --depth=1 gcc
 git clone https://github.com/sohamxda7/llvm-stable -b gcc32  --depth=1 gcc32
-git clone --depth=1 https://github.com/sohamxda7/AnyKernel3 AnyKernel
+git clone --depth=1 https://github.com/UsiFX/AnyKernel3 AnyKernel
 echo "Done"
 IMAGE=$(pwd)/out/arch/arm64/boot/Image.gz-dtb
 TANGGAL=$(date +"%Y$m$d")
@@ -21,7 +21,7 @@ sendinfo() {
         -d chat_id="$chat_id" \
         -d "disable_web_page_preview=true" \
         -d "parse_mode=html" \
-        -d text="<b>• liquid° Kernel •</b>%0Astarted on: <code>liquidCI</code>%0Adevice: <b>Xiaomi Redmi Note7/7S</b>"
+        -d text="<b>• liquid° Kernel •</b>%0Astarted on: <code>liquidCI</code>%0Adevice: <b>Xiaomi Redmi Note7/7S</b>%0Abranch: <code>$(git rev-parse --abbrev-ref HEAD)</code>%0Acompiler: <code>${KBUILD_COMPILER_STRING}</code>%0Astart date: <code>$(date)</code>"
 }
 
 # Push kernel to channel
@@ -29,7 +29,7 @@ push() {
     cd AnyKernel
     ZIP=$(echo *.zip)
     curl -F document=@$ZIP "https://api.telegram.org/bot$token/sendDocument" \
-        -F chat_id="$chat_id" \
+        -F chat_id="$priv_chat_id" \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=html" \
         -F caption="Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For <b>Xiaomi Redmi Note 7/7s</b>"
@@ -52,8 +52,8 @@ function compile() {
                     CC=clang \
                     CLANG_TRIPLE=aarch64-linux-gnu- \
                     CROSS_COMPILE=aarch64-linux-android- \
-                    CROSS_COMPILE_ARM32=arm-linux-androideabi-
-
+                    CROSS_COMPILE_ARM32=arm-linux-androideabi- \
+                    V=0 2>&1 | tee build.log
     if ! [ -a "$IMAGE" ]; then
         finerr
         exit 1
