@@ -6,7 +6,7 @@ git clone https://github.com/sohamxda7/llvm-stable -b gcc32  --depth=1 gcc32
 git clone --depth=1 https://github.com/UsiFX/AnyKernel3 AnyKernel
 echo "Done"
 IMAGE=$(pwd)/out/arch/arm64/boot/Image.gz-dtb
-TANGGAL=$(date +"%Y$m$d")
+TANGGAL=$(date +"%Y%m%d")
 START=$(date +"%s")
 KERNEL_DIR=$(pwd)
 PATH="${KERNEL_DIR}/clang/bin:${KERNEL_DIR}/gcc/bin:${KERNEL_DIR}/gcc32/bin:${PATH}"
