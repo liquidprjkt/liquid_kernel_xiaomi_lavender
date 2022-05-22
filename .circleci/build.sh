@@ -2,6 +2,8 @@
 echo "Cloning dependencies"
 git clone --depth=1 https://gitlab.com/rk134/liquid-clang clang
 git clone --depth=1 https://github.com/UsiFX/AnyKernel3 AnyKernel
+git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 los-4.9-64
+git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 los-4.9-32
 echo "Done"
 IMAGE=$(pwd)/out/arch/arm64/boot/Image.gz-dtb
 TANGGAL=$(date +"%Y%m%d")
@@ -46,8 +48,18 @@ finerr() {
 function compile() {
     make O=out ARCH=arm64 lavender-perf_defconfig
     make -j$(nproc --all) O=out \
+                    PATH=$KERNEL_DIR/clang/bin:$PATH \
                     ARCH=arm64 \
                     CC=clang \
+                    AR=llvm-ar \
+                    NM=llvm-nm \
+                    STRIP=llvm-strip \
+                    OBJCOPY=llvm-objcopy \
+                    OBJDUMP=llvm-objdump \
+                    OBJSIZE=llvm-size \
+                    HOSTCC=clang \
+                    HOSTCXX=clang++ \
+                    HOSTAR=llvm-ar \
                     CLANG_TRIPLE=aarch64-linux-gnu- \
                     CROSS_COMPILE=aarch64-linux-android- \
                     CROSS_COMPILE_ARM32=arm-linux-androideabi- \
